@@ -74,5 +74,31 @@ class AuditorTests(unittest.TestCase):
         problems = device.violations({"require_owner": True})
         self.assertEqual(problems[0]["type"], "missing_owner")
 
+
+    def test_multiple_violations(self):
+        """One device can fail more than one policy check."""
+        import xml.etree.ElementTree as ET
+
+        from pa2 import Device
+
+        element = ET.fromstring(
+            '<device id="sw2" role="switch" os="15.1">'
+            '<interface status="down"/>'
+            '<interface status="down"/>'
+            '</device>'
+        )
+        device = Device(element)
+        policy = {
+            "min_os": {"switch": "15.2"},
+            "require_owner": True,
+            "max_down_interfaces": 1,
+        }
+        problems = device.violations(policy)
+        types = {problem["type"] for problem in problems}
+        self.assertEqual(
+            types,
+            {"os_outdated", "missing_owner", "too_many_down"},
+        )
+
 if __name__ == '__main__':
     unittest.main()
