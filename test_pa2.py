@@ -100,5 +100,12 @@ class AuditorTests(unittest.TestCase):
             {"os_outdated", "missing_owner", "too_many_down"},
         )
 
+    def test_missing_xml_file(self):
+        """Missing XML input raises the custom input error."""
+        with tempfile.TemporaryDirectory() as directory:
+            missing = Path(directory) / "missing.xml"
+            with self.assertRaises(InputFileError):
+                read_inventory(missing)
+
 if __name__ == '__main__':
     unittest.main()
