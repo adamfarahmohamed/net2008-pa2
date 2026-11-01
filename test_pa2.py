@@ -60,5 +60,19 @@ class AuditorTests(unittest.TestCase):
                 read_policy(policy_file)
 
 
+    def test_owner_with_spaces(self):
+        """Whitespace-only owners count as missing."""
+        import xml.etree.ElementTree as ET
+
+        from pa2 import Device
+
+        element = ET.fromstring(
+            '<device id="sw1" role="switch" os="15.2">'
+            '<owner>   </owner></device>'
+        )
+        device = Device(element)
+        problems = device.violations({"require_owner": True})
+        self.assertEqual(problems[0]["type"], "missing_owner")
+
 if __name__ == '__main__':
     unittest.main()
